@@ -41,6 +41,7 @@ class IMP implements MouseListener{
       JMenuBar bar = new JMenuBar();
       JMenu file = new JMenu("File");
       JMenu functions = getFunctions();
+      JMenu filters = getFilters();
       frame.addWindowListener(new WindowAdapter(){
               public void windowClosing(WindowEvent ev){quit();}
             });
@@ -61,6 +62,7 @@ class IMP implements MouseListener{
       file.add(exitItem);
       bar.add(file);
       bar.add(functions);
+      bar.add(filters);
       frame.setSize(600, 600);
       mp = new JPanel();
       mp.setBackground(new Color(0, 0, 0));
@@ -101,13 +103,6 @@ class IMP implements MouseListener{
            
       fun.add(secondItem);
       
-      JMenuItem thirdItem = new JMenuItem("Grayscale -> Edge Detection");
-      thirdItem.addActionListener(new ActionListener(){
-          public void actionPerformed(ActionEvent evt){fun3();}
-           });
-           
-      fun.add(thirdItem);
-      
       JMenuItem fourthItem = new JMenuItem("Find Orange Object");
       fourthItem.addActionListener(new ActionListener(){
           public void actionPerformed(ActionEvent evt){fun4();}
@@ -115,8 +110,37 @@ class IMP implements MouseListener{
            
       fun.add(fourthItem);
       
-      return fun;   
+      return fun; 
 
+  }
+  
+  private JMenu getFilters() {
+	  JMenu filterMenu = new JMenu("Filters");
+      JMenuItem Edge33Item = new JMenuItem("3x3 Edge Detection");
+      Edge33Item.addActionListener(new ActionListener(){
+    	  public void actionPerformed(ActionEvent evt){fun3("EdgeDetection33");}
+      });
+      filterMenu.add(Edge33Item);
+      
+      JMenuItem Edge55Item = new JMenuItem("5x5 Edge Detection");
+      Edge55Item.addActionListener(new ActionListener(){
+    	  public void actionPerformed(ActionEvent evt){fun3("EdgeDetection55");}
+      });
+      filterMenu.add(Edge55Item);
+      
+      JMenuItem SharpenItem = new JMenuItem("3x3 Sharpen");
+      SharpenItem.addActionListener(new ActionListener(){
+    	  public void actionPerformed(ActionEvent evt){fun3("Sharpen");}
+      });
+      filterMenu.add(SharpenItem);
+      
+      JMenuItem BlurItem = new JMenuItem("3x3 Blur");
+      BlurItem.addActionListener(new ActionListener(){
+    	  public void actionPerformed(ActionEvent evt){fun3("Blur");}
+      });
+      filterMenu.add(BlurItem);
+      
+      return filterMenu;
   }
   
   /*
@@ -310,10 +334,10 @@ class IMP implements MouseListener{
   /*
    * fun3
    */
-  private void fun3()
+  private void fun3(String filterName)
   {
 	  int[][] temp_pic = new int[height][width];
-	  Filter filter = ff.getFilter("Blur");
+	  Filter filter = ff.getFilter(filterName);
 	  if (filter == null) {
 		  System.out.println("No such filter exists.");
 		  return;
@@ -364,7 +388,7 @@ class IMP implements MouseListener{
   private void fun4()
   {
 	  // min = (18, 50, 90) and max = (27, 255, 255) - orange
-	  Threshold t = new Threshold(18f, 27f, 0.4f, 1f, 0.9f, 1f);
+	  Threshold t = new Threshold(18f, 27f, 0.4f, 1f, 0.5f, 1f);
 	  for (int y = 0; y < height; y++) {
 		  for ( int x = 0; x < width; x++) {
 			  if (t.thresholdRgbArray(getPixelArray(picture[y][x]))) {

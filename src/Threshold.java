@@ -18,11 +18,11 @@ public class Threshold {
 		  
 		  hsvArray = RGBtoHSV(rgbArray);
 
-		  if (hsvArray[1] > 27 || hsvArray[1] < 18) {
+		  if (hsvArray[1] > this.hMax || hsvArray[1] < this.hMin) {
 			  return false;
-		  } else if (hsvArray[2] > 1 || hsvArray[2] < 0.1569f) {
+		  } else if (hsvArray[2] > this.sMax || hsvArray[2] < this.sMin) {
 			  return false;
-		  } else if (hsvArray[3] > 1 || hsvArray[3] < .3530f) {
+		  } else if (hsvArray[3] > this.vMax || hsvArray[3] < this.vMin) {
 			  return false;
 		  } else {
 			  return true;
