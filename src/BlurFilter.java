@@ -1,7 +1,7 @@
 
 public class BlurFilter extends Filter {
 	
-	private static final int[][] matrix = {
+	private static final float[][] matrix = {
 		{1, 1, 1},
 		{1, 1, 1},
 		{1, 1, 1}};

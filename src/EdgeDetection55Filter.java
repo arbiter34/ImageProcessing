@@ -1,7 +1,7 @@
 
 public class EdgeDetection55Filter extends Filter {
 	
-	private static final int[][] matrix = {
+	private static final float[][] matrix = {
 		{-1, -1, -1, -1, -1},
 		{-1,  0,  0,  0, -1},
 		{-1,  0, 16,  0, -1},

@@ -88,13 +88,7 @@ class IMP implements MouseListener{
    
   private JMenu getFunctions()
   {
-     JMenu fun = new JMenu("Functions");
-     JMenuItem firstItem = new JMenuItem("MyExample - fun1 method");
-     firstItem.addActionListener(new ActionListener(){
-          public void actionPerformed(ActionEvent evt){fun1();}
-           });
-        
-      fun.add(firstItem);
+     JMenu fun = new JMenu("Functions");     
       
       JMenuItem secondItem = new JMenuItem("Convert to Grayscale");
       secondItem.addActionListener(new ActionListener(){
@@ -130,7 +124,7 @@ class IMP implements MouseListener{
       
       JMenuItem SharpenItem = new JMenuItem("3x3 Sharpen");
       SharpenItem.addActionListener(new ActionListener(){
-    	  public void actionPerformed(ActionEvent evt){fun3("Sharpen");}
+    	  public void actionPerformed(ActionEvent evt){fun3("Sharpen33");}
       });
       filterMenu.add(SharpenItem);
       
@@ -139,6 +133,12 @@ class IMP implements MouseListener{
     	  public void actionPerformed(ActionEvent evt){fun3("Blur");}
       });
       filterMenu.add(BlurItem);
+      
+      /*JMenuItem ScaleItem = new JMenuItem("50% Scale");
+      ScaleItem.addActionListener(new ActionListener(){
+    	  public void actionPerformed(ActionEvent evt){fun3("Scale50");}
+      });
+      filterMenu.add(ScaleItem);*/
       
       return filterMenu;
   }
@@ -207,10 +207,23 @@ class IMP implements MouseListener{
   {
         for(int i = 0; i<width*height; i++)
              pixels[i] = results[i]; 
-       Image img2 = toolkit.createImage(new MemoryImageSource(width, height, pixels, 0, width)); 
+       Image img2 = toolkit.createImage(new MemoryImageSource(width, height, pixels, 0, width));
+       
+       PixelGrabber pg = new PixelGrabber(img2, 0, 0, width, height, pixels, 0, width );
+       try{
+           pg.grabPixels();
+       }catch(InterruptedException e)
+         {
+            System.err.println("Interrupted waiting for pixels");
+            return;
+         }
+       for(int i = 0; i<width*height; i++)
+          results[i] = pixels[i];  
+       turnTwoDimensional();
 
       JLabel label2 = new JLabel(new ImageIcon(img2));    
        mp.removeAll();
+       mp.setBackground(new Color(0, 0, 0));
        mp.add(label2);
      
        mp.revalidate(); 
@@ -339,7 +352,7 @@ class IMP implements MouseListener{
 	  int[][] temp_pic = new int[height][width];
 	  Filter filter = ff.getFilter(filterName);
 	  if (filter == null) {
-		  System.out.println("No such filter exists.");
+		  JOptionPane.showMessageDialog(mp, "The requested filter does not exist." ,"Filter Error", JOptionPane.PLAIN_MESSAGE);
 		  return;
 	  }
 	  
@@ -367,7 +380,7 @@ class IMP implements MouseListener{
 					  }
 					  
 					  for (int k = 1; k < 4; k++) {
-						  rgbArray[k] += filter.getKernelValue(i, j) * ((picture[new_y][new_x] >> (24-(8*k))) & 0xff);
+						  rgbArray[k] += (int)(filter.getKernelValue(i, j) * (float)((picture[new_y][new_x] >> (24-(8*k))) & 0xff));
 					  }
 				  }
 			  }
@@ -388,7 +401,7 @@ class IMP implements MouseListener{
   private void fun4()
   {
 	  // min = (18, 50, 90) and max = (27, 255, 255) - orange
-	  Threshold t = new Threshold(18f, 27f, 0.4f, 1f, 0.5f, 1f);
+	  Threshold t = new Threshold(5f, 27f, 0.3f, 1f, 0.3f, 1f);
 	  for (int y = 0; y < height; y++) {
 		  for ( int x = 0; x < width; x++) {
 			  if (t.thresholdRgbArray(getPixelArray(picture[y][x]))) {

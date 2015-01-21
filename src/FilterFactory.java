@@ -10,6 +10,8 @@ public class FilterFactory {
 			return new BlurFilter();
 		} else if (name == "Sharpen33") {
 			return new Sharpen33Filter();
+		} else if (name == "Scale50") {
+			return new Scale50Filter();
 		}
 		return null;
 	}
