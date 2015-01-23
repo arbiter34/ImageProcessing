@@ -288,22 +288,6 @@ class IMP implements MouseListener{
     * After you make changes and do your calculations to your pixel values the getPixels method will put the 4 values in your ARGB array back into a single
     * integer value so you can give it back to the program and display the new picture. 
     */
-  private void fun1()
-  {
-     
-    for(int i=0; i<height; i++)
-       for(int j=0; j<width; j++)
-       {   
-          int rgbArray[] = new int[4];
-          
-          rgbArray = getPixelArray(picture[i][j]);
-          //picture[i][j] = changePixels(picture[i][j]);
-        
-           rgbArray[1] = 0;
-           picture[i][j] = getPixels(rgbArray);
-        } 
-     resetPicture();
-  }
 
   /*
    * fun2
@@ -313,6 +297,7 @@ class IMP implements MouseListener{
   {
 	  for (int y = 0; y < height; y++) {
 		  for (int x = 0; x < width; x++) {
+			  //for each pixel convert grayscale
 			  picture[y][x] = convertPixelToGrayscale(picture[y][x]);
 		  }
 	  }
@@ -323,17 +308,27 @@ class IMP implements MouseListener{
   private int convertPixelToGrayscale(int pixel) {
 	  int rgbArray[] = new int[4];
 	  
+	  //grab pixels as individual ints
 	  rgbArray = getPixelArray(pixel);
 	  
+	  //calculate luminance average via colors weights(wikipedia)
 	  int luminance_average = (int) ((rgbArray[1]*RED_WEIGHT)+(rgbArray[2]*GREEN_WEIGHT)+(rgbArray[3]*BLUE_WEIGHT));
+	  
+	  //replace RGB with luminance average
 	  for (int i = 1; i < 4; i++) {
 		  rgbArray[i] = luminance_average;
 	  }
 	  
+	  //convert 4 int array back to single int
 	  pixel = getPixels(rgbArray);
+	  
+	  //return int value
 	  return pixel;
   }
   
+  /*
+   * Clamp rgb values for 0 <= X <= 255
+   */
   private int clamp(int val) {
 	  if (val < 0) {
 		  return 0;
@@ -345,53 +340,79 @@ class IMP implements MouseListener{
   }
   
   /*
-   * fun3
+   * Image Convolution Function
+   * Input: Takes name of convolution kernel to apply
+   * Output: None - redraws picture
    */
   private void fun3(String filterName)
   {
+	  //init new 2d int array for new image values
 	  int[][] temp_pic = new int[height][width];
+	  
+	  //get filter from FilterFactory
 	  Filter filter = ff.getFilter(filterName);
+	  
+	  //Check if filter is valid - display error and return gracefully if not
 	  if (filter == null) {
 		  JOptionPane.showMessageDialog(mp, "The requested filter does not exist." ,"Filter Error", JOptionPane.PLAIN_MESSAGE);
 		  return;
 	  }
 	  
+	  //unnecessary copy of picture array - could remove
 	  for (int y = 0; y < height; y++) {
 		  for (int x = 0; x < width; x++) {
 			  temp_pic[y][x] = picture[y][x];
 		  }
 	  }
+	  
+	  //iterate over every pixel in picture array
 	  for (int y = 0; y < height; y++) {
 		  for (int x = 0; x < width; x++) {
+			  //new rgbArray
 			  int[] rgbArray = new int[4];
+			  
+			  //init rgbArray to 0 due to += in kernel loop
 			  for (int i = 0; i < 4; i++) {
 				  rgbArray[i] = 0;
 			  }
 			  
+			  //iterate over convolution kernel
 			  for (int i = 0; i < filter.getHeight(); i++) {
+				  //calc new y value for kernel x, y relative to main pixel
 				  int new_y = y + (i-(int)(filter.getHeight()/2));
+				  
+				  //check if out of bounds, if so skip(easiest edge handling)
 				  if (new_y < 0 || new_y >= height) {
 					  continue;
 				  }
 				  for ( int j = 0; j < filter.getWidth(); j++) {
+					  //calc new x value for kernel x, y relative to main pixel
 					  int new_x = x + (j-(int)(filter.getWidth()/2));
+					  //check if out of bounds, if so skip
 					  if (new_x < 0 || new_x >= width) {
 						  continue;
 					  }
-					  
+					  //add (r|g|b) value to calculated pixel value
 					  for (int k = 1; k < 4; k++) {
 						  rgbArray[k] += (int)(filter.getKernelValue(i, j) * (float)((picture[new_y][new_x] >> (24-(8*k))) & 0xff));
 					  }
 				  }
 			  }
+			  
+			  //calculate value to divisor, then clamp
 			  for (int i = 1; i < 4; i++) {
 				  rgbArray[i] = clamp(rgbArray[i]/filter.getDivisor())+filter.getOffset();
 			  }
+			  //grab original alpha value
 			  rgbArray[0] = (picture[y][x] >> 24) & 0xff;
+			  //place new value in new array
 			  temp_pic[y][x] = getPixels(rgbArray);
 		  }
 	  }
+	  //change picture reference to temp_pic
 	  picture = temp_pic;
+	  
+	  //redraw picture
       resetPicture();
   }
   
@@ -401,9 +422,13 @@ class IMP implements MouseListener{
   private void fun4()
   {
 	  // min = (18, 50, 90) and max = (27, 255, 255) - orange
+	  //Create new threshold object(used for RGBtoHSV and then threshold check based on creator arguments
 	  Threshold t = new Threshold(5f, 27f, 0.3f, 1f, 0.3f, 1f);
+	  
+	  
 	  for (int y = 0; y < height; y++) {
 		  for ( int x = 0; x < width; x++) {
+			  //if in threshold value, turn white; else turn black
 			  if (t.thresholdRgbArray(getPixelArray(picture[y][x]))) {
 				  picture[y][x] = 0xFFFFFFFF;
 			  } else {
@@ -411,15 +436,11 @@ class IMP implements MouseListener{
 			  }
 		  }
 	  }
+	  //redraw picture
 	  resetPicture();
   }
   
-  /*
-   * fun5
-   */
-  private void fun5()
-  {
-  }
+
 
   
   
